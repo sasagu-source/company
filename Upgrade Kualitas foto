@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Photo Enhancer 8K Pro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            700: '#0e7490',
+                            900: '#164e63',
+                        }
+                    },
+                    animation: {
+                        'scan': 'scan 2.5s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%, 100%': { top: '0%' },
+                            '50%': { top: '100%' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 0.4 },
+                            '50%': { opacity: 0.8 }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f3f4f6;
+        }
+        /* Glassmorphic card styling */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-hover:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+        /* Comparison slider style */
+        .slider-container {
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        .slider-after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        .slider-divider {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: #06b6d4;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+            cursor: ew-resize;
+            z-index: 20;
+        }
+        .slider-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #06b6d4;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Navigation Header -->
+    <header class="border-b border-gray-800/80 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-cyan-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid font-bold fa-wand-magic-sparkles text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+                        AI Photo Enhancer <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold ml-1">8K ULTRA</span>
+                    </h1>
+                    <p class="text-xs text-gray-400 hidden sm:block">Transformasi Foto Kusam Menjadi Tajam & Jelas dengan AI Gemini</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button id="resetAppBtn" class="px-3.5 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 rounded-lg border border-gray-700/60 transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Reset Foto</span>
+                </button>
+                <div class="h-4 w-px bg-gray-800"></div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Gemini 3.1 Ready
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Sidebar: Controls & Presets -->
+        <section class="lg:col-span-4 flex flex-col space-y-5">
+            
+            <!-- Upload Box / File Input -->
+            <div class="glass-panel glass-panel-hover rounded-2xl p-5 transition-all duration-300">
+                <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-brand-500"></i>
+                    1. Upload Foto
+                </h2>
+
+                <div id="dropzone" class="border-2 border-dashed border-gray-700 hover:border-brand-500/70 bg-slate-800/40 hover:bg-slate-800/80 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center group relative overflow-hidden">
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <div class="w-12 h-12 rounded-full bg-slate-800 border border-gray-700 group-hover:border-brand-500/50 flex items-center justify-center text-gray-400 group-hover:text-brand-500 mb-3 transition shadow-inner">
+                        <i class="fa-solid fa-image text-xl"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-200 mb-1">Klik atau seret foto ke sini</p>
+                    <p class="text-[11px] text-gray-400">Mendukung JPG, PNG, WEBP (Maks. 20MB)</p>
+                </div>
+
+                <div id="fileMeta" class="mt-3 hidden text-xs text-gray-400 flex items-center justify-between bg-slate-900/60 p-2.5 rounded-lg border border-gray-800">
+                    <span id="fileName" class="truncate max-w-[180px] text-gray-300 font-medium">nama_foto.jpg</span>
+                    <span id="fileSize" class="text-gray-500">2.4 MB</span>
+                </div>
+            </div>
+
+            <!-- AI Enhancement Presets -->
+            <div class="glass-panel rounded-2xl p-5 space-y-4">
+                <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-brand-500"></i>
+                    2. Mode Peningkatan AI
+                </h2>
+
+                <div class="grid grid-cols-2 gap-2.5" id="presetButtons">
+                    <button data-preset="8k-ultra" class="preset-btn active p-3 rounded-xl border border-brand-500 bg-brand-500/10 text-left transition relative group">
+                        <div class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sparkles text-brand-500"></i> 8K Ultra Detail
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">Penajaman maksimal & hapus blur total.</p>
+                    </button>
+
+                    <button data-preset="face-restoration" class="preset-btn p-3 rounded-xl border border-gray-800 bg-slate-800/40 hover:border-gray-700 text-left transition relative group">
+                        <div class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-gear text-indigo-400"></i> Face Enhance
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">Perjelas detail ekspresi & tekstur wajah.</p>
+                    </button>
+
+                    <button data-preset="hdr-contrast" class="preset-btn p-3 rounded-xl border border-gray-800 bg-slate-800/40 hover:border-gray-700 text-left transition relative group">
+                        <div class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sun text-amber-400"></i> HDR Lighting
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">Pencahayaan dramatis & kontras tajam.</p>
+                    </button>
+
+                    <button data-preset="clean-denoise" class="preset-btn p-3 rounded-xl border border-gray-800 bg-slate-800/40 hover:border-gray-700 text-left transition relative group">
+                        <div class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-broom text-emerald-400"></i> Restorasi & Clean
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">Bersihkan noise, bintik & watermark.</p>
+                    </button>
+                </div>
+
+                <!-- Custom Prompt Overlay Option -->
+                <div class="pt-2 border-t border-gray-800">
+                    <label class="text-xs font-medium text-gray-300 block mb-1.5 flex items-center justify-between">
+                        <span>Instruksi Tambahan (Opsional):</span>
+                        <span class="text-[10px] text-gray-500">AI Prompt</span>
+                    </label>
+                    <textarea id="customPrompt" rows="2" placeholder="Contoh: Buat warna baju lebih terang, pertajam latar belakang..." class="w-full bg-slate-900/80 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- Run AI Enhancement Button -->
+                <button id="enhanceBtn" disabled class="w-full py-3.5 px-4 bg-gradient-to-r from-brand-600 via-cyan-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-brand-500/25 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt text-sm"></i>
+                    <span>Proses Foto Jadi 8K Super Tajam</span>
+                </button>
+            </div>
+
+            <!-- Manual Fine Tuning (Canvas Adjustments) -->
+            <div id="manualControlsPanel" class="glass-panel rounded-2xl p-5 space-y-3 hidden">
+                <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-sliders-simple text-brand-500"></i> Adjustments</span>
+                    <button id="resetManualBtn" class="text-[11px] text-cyan-400 hover:underline">Reset Nilai</button>
+                </h2>
+
+                <div class="space-y-2.5 text-xs">
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>Ketajaman (Sharpness)</span>
+                            <span id="valSharpness" class="text-gray-200 font-mono">0</span>
+                        </div>
+                        <input type="range" id="adjSharpness" min="0" max="100" value="0" class="w-full accent-brand-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div>
+                        <flex class="flex justify-between text-gray-400 mb-1">
+                            <span>Kontras (Contrast)</span>
+                            <span id="valContrast" class="text-gray-200 font-mono">100%</span>
+                        </flex>
+                        <input type="range" id="adjContrast" min="50" max="200" value="100" class="w-full accent-brand-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>Kecerahan (Brightness)</span>
+                            <span id="valBrightness" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="adjBrightness" min="50" max="180" value="100" class="w-full accent-brand-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>Saturasi Warna (Saturate)</span>
+                            <span id="valSaturate" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="adjSaturate" min="0" max="200" value="100" class="w-full accent-brand-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Photos Gallery to test immediately -->
+            <div class="glass-panel rounded-2xl p-4">
+                <p class="text-xs font-semibold text-gray-400 mb-2.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                    Coba dengan Contoh Foto
+                </p>
+                <div class="grid grid-cols-3 gap-2">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80" alt="Sample 1" class="sample-img w-full h-16 object-cover rounded-lg border border-gray-800 hover:border-brand-500 cursor-pointer transition transform hover:scale-105">
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80" alt="Sample 2" class="sample-img w-full h-16 object-cover rounded-lg border border-gray-800 hover:border-brand-500 cursor-pointer transition transform hover:scale-105">
+                    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=300&q=80" alt="Sample 3" class="sample-img w-full h-16 object-cover rounded-lg border border-gray-800 hover:border-brand-500 cursor-pointer transition transform hover:scale-105">
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Main Viewport: Comparison View & Interactive Workspace -->
+        <section class="lg:col-span-8 flex flex-col space-y-4">
+
+            <!-- Toolbar above canvas -->
+            <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-2xl border border-gray-800/80 backdrop-blur-md">
+                <div class="flex items-center space-x-2">
+                    <button id="viewSplitBtn" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-500 text-white shadow-md shadow-brand-500/20 flex items-center gap-1.5">
+                        <i class="fa-solid fa-split-screen"></i> Split Before/After
+                    </button>
+                    <button id="viewSideBtn" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye"></i> Hasil Akhir
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button id="downloadBtn" disabled class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Unduh Foto 8K
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image Viewport & Before/After Slider Area -->
+            <div class="relative min-h-[480px] lg:min-h-[560px] flex-1 bg-slate-950/80 rounded-2xl border border-gray-800 overflow-hidden flex items-center justify-center p-2 group shadow-2xl">
+                
+                <!-- Initial Empty State -->
+                <div id="emptyState" class="text-center p-8 max-w-sm flex flex-col items-center">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-gray-800 flex items-center justify-center text-gray-600 mb-4 shadow-inner">
+                        <i class="fa-solid fa-photo-film text-3xl"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-300 mb-1">Belum Ada Foto Dipilih</h3>
+                    <p class="text-xs text-gray-500 mb-4">Unggah foto kamu atau gunakan sampel gambar untuk melihat keajaiban peningkatan detail 8K AI.</p>
+                    <button onclick="document.getElementById('imageInput').click()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-semibold rounded-xl transition">
+                        Pilih Foto Sekarang
+                    </button>
+                </div>
+
+                <!-- Processing Overlay Loader -->
+                <div id="loadingOverlay" class="absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4 hidden">
+                    <div class="relative w-20 h-20">
+                        <div class="absolute inset-0 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin"></div>
+                        <div class="absolute inset-2 rounded-full border-4 border-indigo-500/20 border-b-indigo-400 animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fa-solid fa-wand-magic-sparkles text-cyan-400 text-xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="text-center space-y-1">
+                        <p id="loadingStatusText" class="text-sm font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                            Menajamkan Detail & Tekstur...
+                        </p>
+                        <p class="text-xs text-gray-400">Menghasilkan resolusi ultra-tinggi dengan Gemini AI</p>
+                    </div>
+                </div>
+
+                <!-- Main Interactive Before/After Container -->
+                <div id="sliderContainer" class="slider-container w-full h-full max-h-[620px] hidden flex items-center justify-center">
+                    
+                    <!-- Original Image (Before - Bottom layer) -->
+                    <img id="imgBefore" src="" alt="Original" class="max-h-full max-w-full object-contain block mx-auto select-none">
+
+                    <!-- Enhanced Image Wrapper (After - Top layer with clip) -->
+                    <div id="sliderAfter" class="slider-after">
+                        <img id="imgAfter" src="" alt="Enhanced" class="max-h-full max-w-full object-contain block mx-auto select-none">
+                    </div>
+
+                    <!-- Divider Line & Handle -->
+                    <div id="sliderDivider" class="slider-divider">
+                        <div class="slider-handle">
+                            <i class="fa-solid fa-code-compare text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- Floating Badges -->
+                    <div class="absolute bottom-4 left-4 z-10 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm border border-white/10 text-[10px] font-bold text-gray-300 uppercase tracking-wider">
+                        Sebelum (Original)
+                    </div>
+                    <div class="absolute bottom-4 right-4 z-10 px-2.5 py-1 rounded-md bg-cyan-950/80 backdrop-blur-sm border border-cyan-500/30 text-[10px] font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-sparkles text-cyan-400"></i> Sesudah (8K AI)
+                    </div>
+                </div>
+
+                <!-- Scanning line effect during AI rendering -->
+                <div id="scanLine" class="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#06b6d4] animate-scan z-20 hidden"></div>
+
+            </div>
+
+            <!-- Quick Info Footer -->
+            <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 px-2 gap-2">
+                <div class="flex items-center space-x-4">
+                    <span id="dimOriginal"><i class="fa-regular fa-file-image mr-1"></i> Resolution: -</span>
+                    <span id="statusMessage" class="text-cyan-400 font-medium">Siap mengolah foto.</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                    <span>Privasi Terjaga - Proses Aman Via API</span>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Custom Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Hidden Canvas for Manual Filters & Adjustments Export -->
+    <canvas id="exportCanvas" class="hidden"></canvas>
+
+    <script>
+        // State variables
+        let originalImageDataUrl = null;
+        let enhancedImageDataUrl = null;
+        let currentMimeType = 'image/jpeg';
+        let activePreset = '8k-ultra';
+        let isProcessing = false;
+
+        // DOM Element references
+        const dropzone = document.getElementById('dropzone');
+        const imageInput = document.getElementById('imageInput');
+        const fileMeta = document.getElementById('fileMeta');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const emptyState = document.getElementById('emptyState');
+        const sliderContainer = document.getElementById('sliderContainer');
+        const imgBefore = document.getElementById('imgBefore');
+        const imgAfter = document.getElementById('imgAfter');
+        const sliderAfter = document.getElementById('sliderAfter');
+        const sliderDivider = document.getElementById('sliderDivider');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingStatusText = document.getElementById('loadingStatusText');
+        const scanLine = document.getElementById('scanLine');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const viewSplitBtn = document.getElementById('viewSplitBtn');
+        const viewSideBtn = document.getElementById('viewSideBtn');
+        const manualControlsPanel = document.getElementById('manualControlsPanel');
+        const resetAppBtn = document.getElementById('resetAppBtn');
+        const dimOriginal = document.getElementById('dimOriginal');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Presets configuration prompts
+        const presetsMap = {
+            '8k-ultra': "Enhance this image to ultra-high quality, 8K resolution, sharp contrast, vibrant natural lighting, perfect clarity, crystal clear details, restored facial features and textures. Remove blur, noise, compression artifacts, and remove any watermark/timestamp/compass overlays.",
+            'face-restoration': "Dramatically restore facial features in this image. Sharp focus on eyes, clean skin textures without losing realism, enhanced expressions, 8K portrait clarity, rich micro-details, remove shadows on faces.",
+            'hdr-contrast': "Apply high dynamic range (HDR) lighting to this photo. Enhance deep blacks, bright clear highlights, rich saturated colors, sharp edges, professional studio photography contrast and depth.",
+            'clean-denoise': "Completely denoise, restore, and clean up this photo. Eliminate blur, grain, JPEG artifacts, digital noise, dust, scratches, and any text/watermarks/timestamps, outputting a crisp 8K master rendering."
+        };
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-900/90 border-rose-500/50 text-rose-200' :
+                           type === 'success' ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-200' :
+                           'bg-slate-800/90 border-cyan-500/50 text-cyan-200';
+            const iconClass = type === 'error' ? 'fa-circle-exclamation' :
+                             type === 'success' ? 'fa-circle-check' : 'fa-info-circle';
+
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg text-xs font-semibold flex items-center space-x-2 transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
+
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Handle File Select
+        dropzone.addEventListener('click', () => imageInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-brand-500', 'bg-slate-800/80');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-brand-500', 'bg-slate-800/80');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-brand-500', 'bg-slate-800/80');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Mohon pilih berkas berupa gambar!', 'error');
+                return;
+            }
+
+            currentMimeType = file.type;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            fileMeta.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImageDataUrl = e.target.result;
+                imgBefore.src = originalImageDataUrl;
+                
+                // Read image dimension
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                    dimOriginal.innerHTML = `<i class="fa-regular fa-file-image mr-1"></i> Resolution: ${tempImg.width} x ${tempImg.height}px`;
+                };
+                tempImg.src = originalImageDataUrl;
+
+                // Show preview state
+                emptyState.classList.add('hidden');
+                sliderContainer.classList.remove('hidden');
+                enhanceBtn.disabled = false;
+                
+                // If enhanced image doesn't exist yet, mirror original
+                if (!enhancedImageDataUrl) {
+                    imgAfter.src = originalImageDataUrl;
+                }
+
+                showToast('Foto berhasil dimuat. Siap diproses!', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Preset button handlers
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => {
+                    b.classList.remove('active', 'border-brand-500', 'bg-brand-500/10');
+                    b.classList.add('border-gray-800', 'bg-slate-800/40');
+                });
+                btn.classList.add('active', 'border-brand-500', 'bg-brand-500/10');
+                activePreset = btn.dataset.preset;
+            });
+        });
+
+        // Sample Images Handler
+        document.querySelectorAll('.sample-img').forEach(img => {
+            img.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(img.src);
+                    const blob = await response.blob();
+                    const file = new File([blob], "sample.jpg", { type: "image/jpeg" });
+                    handleFile(file);
+                } catch (err) {
+                    showToast('Gagal memuat sampel gambar', 'error');
+                }
+            });
+        });
+
+        // AI Enhancement Trigger
+        enhanceBtn.addEventListener('click', runAiEnhancement);
+
+        async function runAiEnhancement() {
+            if (!originalImageDataUrl || isProcessing) return;
+
+            isProcessing = true;
+            enhanceBtn.disabled = true;
+            loadingOverlay.classList.remove('hidden');
+            scanLine.classList.remove('hidden');
+            statusMessage.textContent = "AI sedang merender detail 8K...";
+
+            // Base64 Extraction
+            const base64Data = originalImageDataUrl.split(',')[1];
+            const customPromptText = document.getElementById('customPrompt').value.trim();
+            const baseInstruction = presetsMap[activePreset] || presetsMap['8k-ultra'];
+            const fullPrompt = customPromptText 
+                ? `${baseInstruction} Additional instruction: ${customPromptText}` 
+                : baseInstruction;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: fullPrompt },
+                        {
+                            inlineData: {
+                                mimeType: currentMimeType || "image/jpeg",
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }],
+                generationConfig: {
+                    responseModalities: ["TEXT", "IMAGE"]
+                }
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+            try {
+                loadingStatusText.textContent = "Sedang meningkatkan resolusi & pencahayaan...";
+
+                // API call with exponential backoff retry logic
+                let response = null;
+                let delay = 1500;
+                const maxRetries = 3;
+
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        const res = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            response = await res.json();
+                            break;
+                        } else if (res.status === 429 && i < maxRetries - 1) {
+                            await new Promise(r => setTimeout(r, delay));
+                            delay *= 2;
+                        } else {
+                            throw new Error(`HTTP Error ${res.status}`);
+                        }
+                    } catch (err) {
+                        if (i === maxRetries - 1) throw err;
+                        await new Promise(r => setTimeout(r, delay));
+                        delay *= 2;
+                    }
+                }
+
+                if (!response) {
+                    throw new Error("Gagal memperoleh respon dari API.");
+                }
+
+                const candidate = response.candidates?.[0];
+                const imagePart = candidate?.content?.parts?.find(p => p.inlineData);
+
+                if (imagePart && imagePart.inlineData) {
+                    enhancedImageDataUrl = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+                    imgAfter.src = enhancedImageDataUrl;
+                    
+                    // Enable download & manual adjustments
+                    downloadBtn.disabled = false;
+                    manualControlsPanel.classList.remove('hidden');
+                    
+                    showToast('Peningkatan foto 8K berhasil diselesaikan!', 'success');
+                    statusMessage.textContent = "Proses selesai dengan kualitas 8K Super Tajam.";
+                } else {
+                    throw new Error("API tidak mengembalikan format gambar yang valid.");
+                }
+
+            } catch (error) {
+                console.error('Enhancer Error:', error);
+                showToast('Terjadi kesalahan saat memproses gambar dengan AI. Coba lagi.', 'error');
+                statusMessage.textContent = "Gagal memproses AI.";
+            } finally {
+                isProcessing = false;
+                enhanceBtn.disabled = false;
+                loadingOverlay.classList.add('hidden');
+                scanLine.classList.add('hidden');
+            }
+        }
+
+        // Interactive Comparison Slider logic
+        let isDraggingSlider = false;
+
+        function updateSliderPosition(x) {
+            const rect = sliderContainer.getBoundingClientRect();
+            let position = ((x - rect.left) / rect.width) * 100;
+            
+            if (position < 0) position = 0;
+            if (position > 100) position = 100;
+
+            sliderDivider.style.left = `${position}%`;
+            sliderAfter.style.width = `${100 - position}%`;
+            imgAfter.style.transform = `translateX(-${position}%)`;
+        }
+
+        sliderDivider.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDraggingSlider = true;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingSlider = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingSlider) return;
+            updateSliderPosition(e.clientX);
+        });
+
+        // Touch support for mobile
+        sliderDivider.addEventListener('touchstart', (e) => {
+            isDraggingSlider = true;
+        });
+
+        window.addEventListener('touchend', () => {
+            isDraggingSlider = false;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDraggingSlider || !e.touches[0]) return;
+            updateSliderPosition(e.touches[0].clientX);
+        });
+
+        // Toggle View modes
+        viewSplitBtn.addEventListener('click', () => {
+            viewSplitBtn.classList.add('bg-brand-500', 'text-white');
+            viewSplitBtn.classList.remove('text-gray-400');
+            viewSideBtn.classList.remove('bg-brand-500', 'text-white');
+            viewSideBtn.classList.add('text-gray-400');
+            
+            // Set slider to 50/50
+            sliderDivider.style.left = '50%';
+            sliderAfter.style.width = '50%';
+            imgAfter.style.transform = 'translateX(-50%)';
+            sliderDivider.classList.remove('hidden');
+        });
+
+        viewSideBtn.addEventListener('click', () => {
+            viewSideBtn.classList.add('bg-brand-500', 'text-white');
+            viewSideBtn.classList.remove('text-gray-400');
+            viewSplitBtn.classList.remove('bg-brand-500', 'text-white');
+            viewSplitBtn.classList.add('text-gray-400');
+
+            // Show full enhanced result
+            sliderDivider.style.left = '0%';
+            sliderAfter.style.width = '100%';
+            imgAfter.style.transform = 'translateX(0%)';
+            sliderDivider.classList.add('hidden');
+        });
+
+        // Manual Fine-Tuning Controls
+        const adjSharpness = document.getElementById('adjSharpness');
+        const adjContrast = document.getElementById('adjContrast');
+        const adjBrightness = document.getElementById('adjBrightness');
+        const adjSaturate = document.getElementById('adjSaturate');
+
+        function applyCanvasFilters() {
+            if (!enhancedImageDataUrl && !originalImageDataUrl) return;
+            
+            const b = adjBrightness.value;
+            const c = adjContrast.value;
+            const s = adjSaturate.value;
+
+            document.getElementById('valContrast').textContent = `${c}%`;
+            document.getElementById('valBrightness').textContent = `${b}%`;
+            document.getElementById('valSaturate').textContent = `${s}%`;
+            document.getElementById('valSharpness').textContent = adjSharpness.value;
+
+            // Apply CSS filter preview to enhanced image
+            imgAfter.style.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%)`;
+        }
+
+        [adjSharpness, adjContrast, adjBrightness, adjSaturate].forEach(input => {
+            input.addEventListener('input', applyCanvasFilters);
+        });
+
+        document.getElementById('resetManualBtn').addEventListener('click', () => {
+            adjSharpness.value = 0;
+            adjContrast.value = 100;
+            adjBrightness.value = 100;
+            adjSaturate.value = 100;
+            applyCanvasFilters();
+            showToast('Filter dikembalikan ke awal', 'info');
+        });
+
+        // Download Final Enhanced Photo
+        downloadBtn.addEventListener('click', () => {
+            const targetUrl = enhancedImageDataUrl || originalImageDataUrl;
+            if (!targetUrl) return;
+
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+            const exportImg = new Image();
+
+            exportImg.onload = () => {
+                canvas.width = exportImg.width;
+                canvas.height = exportImg.height;
+
+                // Apply CSS filter to context
+                const b = adjBrightness.value;
+                const c = adjContrast.value;
+                const s = adjSaturate.value;
+                ctx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%)`;
+
+                ctx.drawImage(exportImg, 0, 0);
+
+                // Export PNG
+                const link = document.createElement('a');
+                link.download = `photo_enhanced_8k_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                showToast('Foto tajam 8K berhasil diunduh!', 'success');
+            };
+            exportImg.src = targetUrl;
+        });
+
+        // App Reset
+        resetAppBtn.addEventListener('click', () => {
+            originalImageDataUrl = null;
+            enhancedImageDataUrl = null;
+            imageInput.value = '';
+            fileMeta.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            sliderContainer.classList.add('hidden');
+            manualControlsPanel.classList.add('hidden');
+            enhanceBtn.disabled = true;
+            downloadBtn.disabled = true;
+            dimOriginal.innerHTML = '<i class="fa-regular fa-file-image mr-1"></i> Resolution: -';
+            statusMessage.textContent = "Siap mengolah foto.";
+            showToast('Aplikasi direset', 'info');
+        });
+
+    </script>
+</body>
+</html>
